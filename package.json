@@ -1,13 +1,38 @@
 {
-  "name": "mcp-kev-server",
+  "name": "@kev/mcp",
   "version": "0.1.0",
+  "author": "boB Rudis (bob@rud.is)",
+  "repository": {
+    "type": "git",
+    "url": "https://codeberg.org/hrbrmstr/kev-mcp"
+  },
+  "bugs": {
+    "url": "https://codeberg.org/hrbrmstr/kev-mcp/issues"
+  },
   "description": "MCP server for CISA's Known Exploited Vulnerabilities catalog",
   "type": "module",
   "main": "build/index.js",
+  "bin": {
+    "kev-mcp": "build/cli.js"
+  },
+  "files": [
+    "build",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
-    "start": "node build/index.js"
+    "start": "node build/index.js",
+    "prepublishOnly": "npm run build"
   },
+  "keywords": [
+    "mcp",
+    "kev",
+    "cisa",
+    "vulnerability",
+    "security",
+    "cve"
+  ],
+  "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
     "node-fetch": "^3.3.2",
@@ -16,5 +41,11 @@
   "devDependencies": {
     "@types/node": "^20.5.0",
     "typescript": "^5.2.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

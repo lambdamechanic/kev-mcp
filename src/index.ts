@@ -37,7 +37,7 @@ RESPONSE BEST PRACTICES:
 registerAllTools(server);
 
 // Start the server
-async function main() {
+export async function main() {
   try {
     // Pre-fetch the KEV data on startup
     await getKevData();
@@ -53,4 +53,7 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+// Auto-start if this file is executed directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch(console.error);
+}
