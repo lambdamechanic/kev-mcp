@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { getKevData } from "../utils";
+import { getKevData } from "../utils.js";
 
 export function registerGetCweStatisticsTool(server: McpServer) {
   server.tool(
@@ -12,15 +12,15 @@ export function registerGetCweStatisticsTool(server: McpServer) {
         // Count occurrences of each CWE
         const cweCounts: Record<string, number> = {};
         
-        kevData.vulnerabilities.forEach(vuln => {
-          vuln.cwes.forEach(cwe => {
+        kevData.vulnerabilities.forEach((vuln: any) => {
+          vuln.cwes.forEach((cwe: any) => {
             cweCounts[cwe] = (cweCounts[cwe] || 0) + 1;
           });
         });
         
         // Sort CWEs by frequency
         const topCwes = Object.entries(cweCounts)
-          .sort((a, b) => b[1] - a[1])
+          .sort((a: any, b: any) => b[1] - a[1])
           .map(([cwe, count]) => ({ cwe, count }));
         
         return {

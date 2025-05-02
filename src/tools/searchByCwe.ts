@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { getKevData } from "../utils";
+import { getKevData } from "../utils.js";
 
 export function registerSearchByCweTool(server: McpServer) {
   server.tool(
@@ -17,8 +17,8 @@ export function registerSearchByCweTool(server: McpServer) {
           ? params.cwe.toUpperCase() 
           : `CWE-${params.cwe}`;
         
-        const matchingVulnerabilities = kevData.vulnerabilities.filter(v => 
-          v.cwes.some(cwe => cwe === normalizedCwe)
+        const matchingVulnerabilities = kevData.vulnerabilities.filter((v: any) => 
+          v.cwes.some((cwe: any) => cwe === normalizedCwe)
         );
         
         return {

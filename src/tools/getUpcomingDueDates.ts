@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { getKevData } from "../utils";
+import { getKevData } from "../utils.js";
 
 export function registerGetUpcomingDueDatesTool(server: McpServer) {
   server.tool(
@@ -17,13 +17,13 @@ export function registerGetUpcomingDueDatesTool(server: McpServer) {
         const futureDate = new Date();
         futureDate.setDate(today.getDate() + lookAheadDays);
         
-        const upcomingVulnerabilities = kevData.vulnerabilities.filter(v => {
+        const upcomingVulnerabilities = kevData.vulnerabilities.filter((v: any) => {
           const dueDate = new Date(v.dueDate);
           return dueDate >= today && dueDate <= futureDate;
         });
         
         // Sort by due date (ascending)
-        upcomingVulnerabilities.sort((a, b) => 
+        upcomingVulnerabilities.sort((a: any, b: any) => 
           new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
         );
         

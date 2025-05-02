@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { getKevData } from "../utils";
+import { getKevData } from "../utils.js";
 
 export function registerGetRecentVulnerabilitiesTool(server: McpServer) {
   server.tool(
@@ -16,7 +16,7 @@ export function registerGetRecentVulnerabilitiesTool(server: McpServer) {
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - lookbackDays);
         
-        const recentVulnerabilities = kevData.vulnerabilities.filter(v => {
+        const recentVulnerabilities = kevData.vulnerabilities.filter((v: any) => {
           const addedDate = new Date(v.dateAdded);
           return addedDate >= cutoffDate;
         });

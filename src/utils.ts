@@ -1,4 +1,4 @@
-import { KevData, CachedData } from "./types";
+import { KevData, CachedData } from "./types.js";
 import fetch from "node-fetch";
 
 // Constants

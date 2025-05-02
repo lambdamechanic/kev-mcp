@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { getKevData } from "../utils";
+import { getKevData } from "../utils.js";
 
 export function registerGetKevCvesTool(server: McpServer) {
   server.tool(
@@ -8,7 +8,7 @@ export function registerGetKevCvesTool(server: McpServer) {
     async () => {
       try {
         const kevData = await getKevData();
-        const cves = kevData.vulnerabilities.map((v) => v.cveID);
+        const cves = kevData.vulnerabilities.map((v: any) => v.cveID);
         return {
           content: [{ type: "text", text: JSON.stringify(cves) }],
         };

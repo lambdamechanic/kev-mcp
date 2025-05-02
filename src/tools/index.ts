@@ -1,18 +1,18 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { registerGetKevCountTool } from "./getKevCount";
-import { registerGetKevReleaseDateTool } from "./getKevReleaseDate";
-import { registerGetKevVendorsTool } from "./getKevVendors";
-import { registerGetKevProductsTool } from "./getKevProducts";
-import { registerGetKevCvesTool } from "./getKevCves";
-import { registerSearchKevTool } from "./searchKev";
-import { registerGetVulnerabilityDetailsTool } from "./getVulnerabilityDetails";
-import { registerGetRecentVulnerabilitiesTool } from "./getRecentVulnerabilities";
-import { registerGetKevStatisticsTool } from "./getKevStatistics";
-import { registerGetRelatedCvesTool } from "./getRelatedCves";
-import { registerGetUpcomingDueDatesTool } from "./getUpcomingDueDates";
-import { registerSearchByCweTool } from "./searchByCwe";
-import { registerGetCweStatisticsTool } from "./getCweStatistics";
-import { registerForceRefreshKevDataTool } from "./forceRefreshKevData";
+import { registerGetKevCountTool } from "./getKevCount.js";
+import { registerGetKevReleaseDateTool } from "./getKevReleaseDate.js";
+import { registerGetKevVendorsTool } from "./getKevVendors.js";
+import { registerGetKevProductsTool } from "./getKevProducts.js";
+import { registerGetKevCvesTool } from "./getKevCves.js";
+import { registerSearchKevTool } from "./searchKev.js";
+import { registerGetVulnerabilityDetailsTool } from "./getVulnerabilityDetails.js";
+import { registerGetRecentVulnerabilitiesTool } from "./getRecentVulnerabilities.js";
+import { registerGetKevStatisticsTool } from "./getKevStatistics.js";
+import { registerGetRelatedCvesTool } from "./getRelatedCves.js";
+import { registerGetUpcomingDueDatesTool } from "./getUpcomingDueDates.js";
+import { registerSearchByCweTool } from "./searchByCwe.js";
+import { registerGetCweStatisticsTool } from "./getCweStatistics.js";
+import { registerForceRefreshKevDataTool } from "./forceRefreshKevData.js";
 
 export function registerAllTools(server: McpServer) {
   // Original tools

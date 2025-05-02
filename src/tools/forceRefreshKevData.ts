@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { getKevData, setCachedData } from "../utils";
+import { getKevData, setCachedData } from "../utils.js";
 
 export function registerForceRefreshKevDataTool(server: McpServer) {
   server.tool(

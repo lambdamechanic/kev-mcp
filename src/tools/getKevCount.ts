@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { getKevData } from "../utils";
+import { getKevData } from "../utils.js";
 
 export function registerGetKevCountTool(server: McpServer) {
   server.tool(

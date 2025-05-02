@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { getKevData } from "../utils";
+import { getKevData } from "../utils.js";
 
 export function registerGetKevProductsTool(server: McpServer) {
   server.tool(
@@ -9,7 +9,7 @@ export function registerGetKevProductsTool(server: McpServer) {
       try {
         const kevData = await getKevData();
         // Get unique products and sort them
-        const products = [...new Set(kevData.vulnerabilities.map((v) => v.product))].sort();
+        const products = [...new Set(kevData.vulnerabilities.map((v: any) => v.product))].sort();
         return {
           content: [{ type: "text", text: JSON.stringify(products) }],
         };

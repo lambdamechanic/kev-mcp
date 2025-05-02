@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { getKevData } from "../utils";
+import { getKevData } from "../utils.js";
 
 export function registerGetRelatedCvesTool(server: McpServer) {
   server.tool(
@@ -27,14 +27,14 @@ export function registerGetRelatedCvesTool(server: McpServer) {
         if (params.vendor) {
           const vendorLower = params.vendor.toLowerCase();
           relatedVulnerabilities = relatedVulnerabilities.filter(
-            v => v.vendorProject.toLowerCase().includes(vendorLower)
+            (v: any) => v.vendorProject.toLowerCase().includes(vendorLower)
           );
         }
         
         if (params.product) {
           const productLower = params.product.toLowerCase();
           relatedVulnerabilities = relatedVulnerabilities.filter(
-            v => v.product.toLowerCase().includes(productLower)
+            (v: any) => v.product.toLowerCase().includes(productLower)
           );
         }
         

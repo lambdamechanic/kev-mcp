@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { getKevData, isDateInRange } from "../utils";
-import { SearchKevParams } from "../types";
+import { getKevData, isDateInRange } from "../utils.js";
+import { SearchKevParams } from "../types.js";
 
 export function registerSearchKevTool(server: McpServer) {
   server.tool(
@@ -27,7 +27,7 @@ export function registerSearchKevTool(server: McpServer) {
         const kevData = await getKevData();
 
         // Filter vulnerabilities based on search criteria
-        const results = kevData.vulnerabilities.filter((vuln) => {
+        const results = kevData.vulnerabilities.filter((vuln: any) => {
           // Full-text search
           if (params.searchText) {
             const searchText = params.searchText.toLowerCase();
