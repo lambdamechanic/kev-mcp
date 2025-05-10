@@ -52,7 +52,7 @@ or (if you cloned/built it locally)
 {
   "mcpServers": {
     "cisa-kev": {
-      "command": "npx",
+      "command": "node",
       "args": ["/path/to/build/index.js"]
     }
 }
