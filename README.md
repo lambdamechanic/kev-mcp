@@ -22,11 +22,41 @@ npm run build
 
 Start the server:
 
+Run right from NPM:
+
+```bash
+npx @hrbrmstr/kev-mcp@latest
+```
+
 ```bash
 node build/index.js
 ```
 
-The server runs on standard input/output, making it compatible with any MCP client.
+The server runs on standard input/output, making it compatible with any MCP client. Example Claude Desktop configs:
+
+Running it in Claude from NPM:
+
+```json
+{
+  "mcpServers": {
+    "cisa-kev": {
+      "command": "npx",
+      "args": ["@hrbrmstr/kev-mcp@latest"]
+    }
+}
+```
+
+or (if you cloned/built it locally)
+
+```json
+{
+  "mcpServers": {
+    "cisa-kev": {
+      "command": "npx",
+      "args": ["/path/to/build/index.js"]
+    }
+}
+```
 
 ## Tools Reference
 
@@ -41,7 +71,7 @@ Returns the total number of vulnerabilities in the KEV catalog.
 
 **Example Response:**
 ```json
-"436"
+"1366"
 ```
 
 #### `get_kev_release_date`
