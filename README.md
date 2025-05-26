@@ -33,7 +33,7 @@ npx @hrbrmstr/kev-mcp
 npx @hrbrmstr/kev-mcp-stdio
 ```
 
-#### HTTP Transport
+### HTTP Transport
 ```bash
 # Using the main command with flag
 npx @hrbrmstr/kev-mcp --transport http
@@ -41,6 +41,86 @@ npx @hrbrmstr/kev-mcp --transport http
 # Using the dedicated HTTP command
 npx @hrbrmstr/kev-mcp-http
 ```
+
+## HTTP Request Logging
+
+When using the HTTP transport, the server provides comprehensive structured logging for monitoring, debugging, and security auditing.
+
+### Log Format
+
+All logs are output as structured JSON to stderr with the following format:
+
+```json
+{
+  "level": "info",
+  "component": "http-transport",
+  "timestamp": "2024-01-15T10:30:45.123Z",
+  "method": "POST",
+  "path": "/mcp",
+  "userAgent": "Mozilla/5.0...",
+  "contentType": "application/json",
+  "contentLength": 256,
+  "remoteAddr": "192.168.1.100",
+  "requestId": "abc123def456",
+  "duration": 125,
+  "status": 200,
+  "responseSize": 512,
+  "mcpMethod": "tools/call",
+  "mcpId": 1,
+  "mcpParams": ["query", "limit"]
+}
+```
+
+### Log Components
+
+- **`http-transport`**: HTTP server and request handling
+- **`stdio-transport`**: STDIO transport (when used)
+- **`server`**: General server lifecycle events
+
+### MCP-Specific Logging
+
+The logging middleware extracts MCP-specific information:
+- `mcpMethod`: The MCP method being called
+- `mcpId`: Request ID from the MCP protocol
+- `mcpParams`: Array of parameter names (not values for security)
+- `mcpError`: Structured error information when requests fail
+
+### Configuration
+
+#### Environment Variables
+- `LOG_HEALTH_CHECKS=true`: Enable logging of successful health check requests (default: only errors are logged)
+- `PORT`: Set the HTTP server port (default: 9191)
+
+### Log Analysis Examples
+
+```bash
+# Start server and pipe logs through jq for formatting
+npx @hrbrmstr/kev-mcp-http 2>&1 | jq '.'
+
+# Filter error logs only
+npx @hrbrmstr/kev-mcp-http 2>&1 | jq 'select(.level == "error")'
+
+# Monitor request performance
+npx @hrbrmstr/kev-mcp-http 2>&1 | jq 'select(.duration > 1000)'
+
+# Track specific MCP methods
+npx @hrbrmstr/kev-mcp-http 2>&1 | jq 'select(.mcpMethod == "tools/call")'
+
+# Correlate logs by request ID
+npx @hrbrmstr/kev-mcp-http 2>&1 | jq 'select(.requestId == "abc123def456")'
+```
+
+### Request Correlation
+
+Each HTTP request receives a unique `requestId` that appears in all related log entries, making it easy to trace the complete lifecycle of a request from start to finish.
+
+### Security Features
+
+- IP addresses are captured for security monitoring
+- User-Agent strings are logged for client identification
+- Authentication headers are redacted (shown as `[REDACTED]`)
+- Request bodies are not logged to prevent sensitive data exposure
+- Only parameter names (not values) are logged for MCP requests
 
 ### Local Development
 

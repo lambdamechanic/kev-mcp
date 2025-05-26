@@ -6,6 +6,14 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { toFetchResponse, toReqRes } from "fetch-to-node";
 import { getKevData } from "./utils.js";
 import { registerAllTools } from "./tools/index.js";
+import { requestLogger, healthCheckLogger } from "./middleware/logging.js";
+
+// Define environment type with requestId
+type Env = {
+  Variables: {
+    requestId: string;
+  };
+};
 
 // Initialize MCP server with system prompts
 const server = new McpServer({
@@ -44,12 +52,22 @@ registerAllTools(server);
 async function startStdioServer() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("KEV MCP Server running on stdio");
+  console.error(JSON.stringify({
+    level: 'info',
+    component: 'stdio-transport',
+    message: 'KEV MCP Server running on stdio',
+    timestamp: new Date().toISOString()
+  }));
 }
 
 // Start the server with HTTP transport
 async function startHttpServer() {
-  const app = new Hono();
+  const app = new Hono<Env>();
+
+  // Add structured request logging middleware
+  app.use("*", healthCheckLogger());
+  app.use("*", requestLogger());
+
   app.post("/mcp", async (c) => {
     // Convert Hono's request/response to Node.js equivalents
     const { req, res } = toReqRes(c.req.raw);
@@ -64,7 +82,14 @@ async function startHttpServer() {
 
       // Clean up on close
       res.on("close", () => {
-        console.log("Request closed");
+        const requestId = c.get('requestId') || 'unknown';
+        console.error(JSON.stringify({
+          level: 'info',
+          component: 'http-transport',
+          message: 'Request closed',
+          requestId,
+          timestamp: new Date().toISOString()
+        }));
         transport.close();
         server.close();
       });
@@ -72,7 +97,15 @@ async function startHttpServer() {
       // Convert back to fetch Response
       return toFetchResponse(res);
     } catch (error) {
-      console.error("Error handling MCP request:", error);
+      const requestId = c.get('requestId') || 'unknown';
+      console.error(JSON.stringify({
+        level: 'error',
+        component: 'http-transport',
+        message: 'Error handling MCP request',
+        error: error instanceof Error ? error.message : String(error),
+        requestId,
+        timestamp: new Date().toISOString()
+      }));
       return c.json({
         jsonrpc: "2.0",
         error: {
@@ -113,7 +146,13 @@ async function startHttpServer() {
 
   // Start the server
   const port = process.env.PORT ? parseInt(process.env.PORT) : 9191;
-  console.log(`MCP Server listening on port ${port}`);
+  console.error(JSON.stringify({
+    level: 'info',
+    component: 'http-transport',
+    message: 'MCP Server started',
+    port,
+    timestamp: new Date().toISOString()
+  }));
   serve({
     fetch: app.fetch,
     port,
@@ -125,7 +164,12 @@ export async function main(transport: string = "stdio") {
   try {
     // Pre-fetch the KEV data on startup
     await getKevData();
-    console.error("KEV data loaded successfully");
+    console.error(JSON.stringify({
+      level: 'info',
+      component: 'server',
+      message: 'KEV data loaded successfully',
+      timestamp: new Date().toISOString()
+    }));
 
     // Start the server with the specified transport
     if (transport === "stdio") {
