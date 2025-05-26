@@ -20,43 +20,87 @@ npm run build
 
 ## Usage
 
-Start the server:
+### Quick Start with npx (Recommended)
 
-Run right from NPM:
+The easiest way to use the KEV MCP server is via npx. The published package includes self-contained bundles that don't require local dependencies:
 
+#### STDIO Transport (Default)
 ```bash
-npx @hrbrmstr/kev-mcp@latest
+# Main command - defaults to stdio transport
+npx @hrbrmstr/kev-mcp
+
+# Explicit stdio transport
+npx @hrbrmstr/kev-mcp-stdio
 ```
 
+#### HTTP Transport
 ```bash
-node build/index.js
+# Using the main command with flag
+npx @hrbrmstr/kev-mcp --transport http
+
+# Using the dedicated HTTP command
+npx @hrbrmstr/kev-mcp-http
 ```
 
-The server runs on standard input/output, making it compatible with any MCP client. Example Claude Desktop configs:
+### Local Development
 
-Running it in Claude from NPM:
+If you've cloned and built the project locally:
 
+```bash
+npm install
+npm run build
+
+# Run locally built version
+node build/kev-mcp-bundle.cjs
+node build/kev-mcp-bundle.cjs --transport http
+```
+
+### MCP Client Configuration
+
+#### For STDIO Transport (Most Common)
 ```json
 {
   "mcpServers": {
     "cisa-kev": {
       "command": "npx",
-      "args": ["@hrbrmstr/kev-mcp@latest"]
+      "args": ["@hrbrmstr/kev-mcp"]
     }
+  }
 }
 ```
 
-or (if you cloned/built it locally)
+#### For HTTP Transport
+```json
+{
+  "mcpServers": {
+    "cisa-kev-http": {
+      "command": "npx",
+      "args": ["@hrbrmstr/kev-mcp-http"]
+    }
+  }
+}
+```
 
+#### Local Build Configuration
 ```json
 {
   "mcpServers": {
     "cisa-kev": {
       "command": "node",
-      "args": ["/path/to/build/index.js"]
+      "args": ["/path/to/kev-mcp/build/kev-mcp-bundle.cjs"]
     }
+  }
 }
 ```
+
+### Self-Contained Bundles
+
+The published package includes bundled executables (~1.2MB each) that contain all dependencies:
+- `kev-mcp-bundle.cjs` - Main CLI supporting both transports
+- `kev-mcp-http-bundle.cjs` - HTTP-only version  
+- `index-bundle.js` - Library for programmatic use
+
+These bundles work without `node_modules` and are perfect for distribution via npx.
 
 ## Tools Reference
 
