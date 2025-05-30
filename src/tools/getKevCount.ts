@@ -4,7 +4,13 @@ import { getKevData } from "../utils.js";
 export function registerGetKevCountTool(server: McpServer) {
   server.tool(
     "get_kev_count",
+    "Get the total number of vulnerabilities in the CISA KEV (Known Exploited Vulnerabilities) catalog",
     {}, // No parameters needed
+    {
+      readOnlyHint: true,
+      openWorldHint: false,
+      idempotentHint: true
+    },
     async () => {
       try {
         const kevData = await getKevData();

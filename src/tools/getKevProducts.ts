@@ -4,7 +4,13 @@ import { getKevData } from "../utils.js";
 export function registerGetKevProductsTool(server: McpServer) {
   server.tool(
     "get_kev_products",
-    {}, // No parameters needed
+    "Get a list of all products that have vulnerabilities in the CISA KEV catalog",
+    {},
+    {
+      readOnlyHint: true,
+      openWorldHint: false,
+      idempotentHint: true
+    },
     async () => {
       try {
         const kevData = await getKevData();

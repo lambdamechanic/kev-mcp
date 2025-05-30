@@ -4,7 +4,13 @@ import { getKevData } from "../utils.js";
 export function registerGetCweStatisticsTool(server: McpServer) {
   server.tool(
     "get_cwe_statistics",
+    "Get statistical analysis of Common Weakness Enumerations (CWEs) found in the CISA KEV catalog",
     {},
+    {
+      readOnlyHint: true,
+      openWorldHint: false,
+      idempotentHint: true
+    },
     async () => {
       try {
         const kevData = await getKevData();

@@ -5,8 +5,14 @@ import { getKevData } from "../utils.js";
 export function registerGetUpcomingDueDatesTool(server: McpServer) {
   server.tool(
     "get_upcoming_due_dates",
+    "Get vulnerabilities from the CISA KEV catalog that have due dates approaching within a specified time period",
     {
       days: z.number().optional().describe("Number of days to look ahead (default: 30)")
+    },
+    {
+      readOnlyHint: true,
+      openWorldHint: false,
+      idempotentHint: true
     },
     async (params: { days?: number }) => {
       try {

@@ -4,7 +4,14 @@ import { getKevData, setCachedData } from "../utils.js";
 export function registerForceRefreshKevDataTool(server: McpServer) {
   server.tool(
     "force_refresh_kev_data",
+    "Force refresh of the CISA KEV catalog data by clearing the cache and fetching the latest version from CISA",
     {},
+    {
+      readOnlyHint: false,
+      destructiveHint: false,
+      openWorldHint: true,
+      idempotentHint: false
+    },
     async () => {
       try {
         // Set cachedData to null to force a refresh

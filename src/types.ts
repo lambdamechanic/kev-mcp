@@ -40,4 +40,5 @@ export interface SearchKevParams {
   dueDateStart?: string;
   dueDateEnd?: string;
   dueDate?: string[];
+  fields?: string[];
 }

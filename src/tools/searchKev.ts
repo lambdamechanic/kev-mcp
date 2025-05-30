@@ -6,6 +6,7 @@ import { SearchKevParams } from "../types.js";
 export function registerSearchKevTool(server: McpServer) {
   server.tool(
     "search_kev",
+    "Search and filter vulnerabilities in the CISA KEV catalog using various criteria including text search, vendor/product filters, date ranges, and ransomware usage",
     {
       searchText: z.string().optional().describe("Text to search in vulnerabilityName, shortDescription, and notes"),
       ransomwareUse: z
@@ -21,9 +22,22 @@ export function registerSearchKevTool(server: McpServer) {
       dueDateStart: z.string().optional().describe("Start date for dueDate range (YYYY-MM-DD)"),
       dueDateEnd: z.string().optional().describe("End date for dueDate range (YYYY-MM-DD)"),
       dueDate: z.array(z.string()).optional().describe("Specific dueDate values to match"),
+      fields: z.array(z.enum([
+        "cveID", "vendorProject", "product", "vulnerabilityName", "dateAdded",
+        "shortDescription", "requiredAction", "dueDate", "knownRansomwareCampaignUse",
+        "cwes", "notes"
+      ]))
+        .optional()
+        .describe("Array of fields to include in response (default: ['cveID', 'vendorProject', 'product', 'vulnerabilityName', 'dateAdded']). Available fields: cveID, vendorProject, product, vulnerabilityName, dateAdded, shortDescription, requiredAction, dueDate, knownRansomwareCampaignUse, cwes, notes"),
+    },
+    {
+      readOnlyHint: true,
+      openWorldHint: false,
+      idempotentHint: true
     },
     async (params: SearchKevParams) => {
       try {
+        const requestedFields = params.fields || ['cveID', 'vendorProject', 'product', 'vulnerabilityName', 'dateAdded'];
         const kevData = await getKevData();
 
         // Filter vulnerabilities based on search criteria
@@ -97,13 +111,24 @@ export function registerSearchKevTool(server: McpServer) {
           return true;
         });
 
+        // Filter fields in results
+        const filteredResults = results.map((vuln: any) => {
+          const filteredVuln: any = {};
+          requestedFields.forEach(field => {
+            if (vuln[field] !== undefined) {
+              filteredVuln[field] = vuln[field];
+            }
+          });
+          return filteredVuln;
+        });
+
         return {
           content: [
             {
               type: "text",
               text: JSON.stringify({
-                count: results.length,
-                vulnerabilities: results,
+                count: filteredResults.length,
+                vulnerabilities: filteredResults,
               }),
             },
           ],

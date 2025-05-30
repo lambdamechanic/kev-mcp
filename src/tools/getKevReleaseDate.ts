@@ -4,14 +4,18 @@ import { getKevData } from "../utils.js";
 export function registerGetKevReleaseDateTool(server: McpServer) {
   server.tool(
     "get_kev_release_date",
-    {}, // No parameters needed
+    "Get the release date of the current CISA KEV (Known Exploited Vulnerabilities) catalog data",
+    {},
+    {
+      readOnlyHint: true,
+      openWorldHint: false,
+      idempotentHint: true
+    },
     async () => {
       try {
         const kevData = await getKevData();
-        // Extract just the date part (YYYY-MM-DD)
-        const dateReleased = kevData.dateReleased.split("T")[0];
         return {
-          content: [{ type: "text", text: dateReleased }],
+          content: [{ type: "text", text: kevData.dateReleased }],
         };
       } catch (error) {
         return {

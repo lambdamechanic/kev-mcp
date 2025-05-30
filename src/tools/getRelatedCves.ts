@@ -5,10 +5,16 @@ import { getKevData } from "../utils.js";
 export function registerGetRelatedCvesTool(server: McpServer) {
   server.tool(
     "get_related_cves",
+    "Find CVEs related to a specific vendor or product in the CISA KEV catalog",
     {
       vendor: z.string().optional().describe("Vendor name to find related CVEs"),
       product: z.string().optional().describe("Product name to find related CVEs"),
       limit: z.number().optional().describe("Maximum number of results to return (default: 20)")
+    },
+    {
+      readOnlyHint: true,
+      openWorldHint: false,
+      idempotentHint: true
     },
     async (params: { vendor?: string; product?: string; limit?: number }) => {
       if (!params.vendor && !params.product) {
