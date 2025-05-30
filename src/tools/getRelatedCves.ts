@@ -9,14 +9,21 @@ export function registerGetRelatedCvesTool(server: McpServer) {
     {
       vendor: z.string().optional().describe("Vendor name to find related CVEs"),
       product: z.string().optional().describe("Product name to find related CVEs"),
-      limit: z.number().optional().describe("Maximum number of results to return (default: 20)")
+      limit: z.number().optional().describe("Maximum number of results to return (default: 20)"),
+      fields: z.array(z.enum([
+        "cveID", "vendorProject", "product", "vulnerabilityName", "dateAdded",
+        "shortDescription", "requiredAction", "dueDate", "knownRansomwareCampaignUse",
+        "cwes", "notes"
+      ]))
+        .optional()
+        .describe("Array of fields to include in response (default: ['cveID', 'vendorProject', 'product', 'vulnerabilityName', 'dateAdded']). Available fields: cveID, vendorProject, product, vulnerabilityName, dateAdded, shortDescription, requiredAction, dueDate, knownRansomwareCampaignUse, cwes, notes")
     },
     {
       readOnlyHint: true,
       openWorldHint: false,
       idempotentHint: true
     },
-    async (params: { vendor?: string; product?: string; limit?: number }) => {
+    async (params: { vendor?: string; product?: string; limit?: number; fields?: string[] }) => {
       if (!params.vendor && !params.product) {
         return {
           content: [{ type: "text", text: "Either vendor or product parameter must be provided" }],
@@ -27,6 +34,7 @@ export function registerGetRelatedCvesTool(server: McpServer) {
       try {
         const kevData = await getKevData();
         const limit = params.limit || 20;
+        const requestedFields = params.fields || ['cveID', 'vendorProject', 'product', 'vulnerabilityName', 'dateAdded'];
         
         let relatedVulnerabilities = kevData.vulnerabilities;
         
@@ -46,14 +54,25 @@ export function registerGetRelatedCvesTool(server: McpServer) {
         
         // Limit the number of results
         const limitedResults = relatedVulnerabilities.slice(0, limit);
+
+        // Filter fields in results
+        const filteredResults = limitedResults.map((vuln: any) => {
+          const filteredVuln: any = {};
+          requestedFields.forEach(field => {
+            if (vuln[field] !== undefined) {
+              filteredVuln[field] = vuln[field];
+            }
+          });
+          return filteredVuln;
+        });
         
         return {
           content: [{ 
             type: "text", 
             text: JSON.stringify({
-              count: limitedResults.length,
+              count: filteredResults.length,
               totalMatches: relatedVulnerabilities.length,
-              vulnerabilities: limitedResults
+              vulnerabilities: filteredResults
             }) 
           }],
         };
