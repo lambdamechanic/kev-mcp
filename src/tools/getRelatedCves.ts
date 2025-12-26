@@ -3,9 +3,9 @@ import { z } from "zod";
 import { getKevData } from "../utils.js";
 
 export function registerGetRelatedCvesTool(server: McpServer) {
-  const relatedCvesInputSchema = z.union([
-    z.object({
-      vendor: z.string().describe("Vendor name to find related CVEs"),
+  const relatedCvesInputSchema = z
+    .object({
+      vendor: z.string().optional().describe("Vendor name to find related CVEs"),
       product: z.string().optional().describe("Product name to find related CVEs"),
       limit: z.number().optional().describe("Maximum number of results to return (default: 20)"),
       fields: z.array(z.enum([
@@ -15,20 +15,15 @@ export function registerGetRelatedCvesTool(server: McpServer) {
       ]))
         .optional()
         .describe("Array of fields to include in response (default: ['cveID', 'vendorProject', 'product', 'vulnerabilityName', 'dateAdded']). Available fields: cveID, vendorProject, product, vulnerabilityName, dateAdded, shortDescription, requiredAction, dueDate, knownRansomwareCampaignUse, cwes, notes")
-    }),
-    z.object({
-      vendor: z.string().optional().describe("Vendor name to find related CVEs"),
-      product: z.string().describe("Product name to find related CVEs"),
-      limit: z.number().optional().describe("Maximum number of results to return (default: 20)"),
-      fields: z.array(z.enum([
-        "cveID", "vendorProject", "product", "vulnerabilityName", "dateAdded",
-        "shortDescription", "requiredAction", "dueDate", "knownRansomwareCampaignUse",
-        "cwes", "notes"
-      ]))
-        .optional()
-        .describe("Array of fields to include in response (default: ['cveID', 'vendorProject', 'product', 'vulnerabilityName', 'dateAdded']). Available fields: cveID, vendorProject, product, vulnerabilityName, dateAdded, shortDescription, requiredAction, dueDate, knownRansomwareCampaignUse, cwes, notes")
-    }),
-  ]);
+    })
+    .superRefine((value, ctx) => {
+      if (!value.vendor && !value.product) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Either vendor or product parameter must be provided",
+        });
+      }
+    });
 
   const registeredTool = server.tool(
     "get_related_cves",
