@@ -90,6 +90,7 @@ The logging middleware extracts MCP-specific information:
 #### Environment Variables
 - `LOG_HEALTH_CHECKS=true`: Enable logging of successful health check requests (default: only errors are logged)
 - `PORT`: Set the HTTP server port (default: 9191)
+- `KEV_CACHE_PATH`: Persist KEV cache JSON to disk (defaults to in-memory only)
 
 ### Log Analysis Examples
 
