@@ -3,27 +3,18 @@ import { z } from "zod";
 import { getKevData } from "../utils.js";
 
 export function registerGetRelatedCvesTool(server: McpServer) {
-  const relatedCvesInputSchema = z
-    .object({
-      vendor: z.string().optional().describe("Vendor name to find related CVEs"),
-      product: z.string().optional().describe("Product name to find related CVEs"),
-      limit: z.number().optional().describe("Maximum number of results to return (default: 20)"),
-      fields: z.array(z.enum([
-        "cveID", "vendorProject", "product", "vulnerabilityName", "dateAdded",
-        "shortDescription", "requiredAction", "dueDate", "knownRansomwareCampaignUse",
-        "cwes", "notes"
-      ]))
-        .optional()
-        .describe("Array of fields to include in response (default: ['cveID', 'vendorProject', 'product', 'vulnerabilityName', 'dateAdded']). Available fields: cveID, vendorProject, product, vulnerabilityName, dateAdded, shortDescription, requiredAction, dueDate, knownRansomwareCampaignUse, cwes, notes")
-    })
-    .superRefine((value, ctx) => {
-      if (!value.vendor && !value.product) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Either vendor or product parameter must be provided",
-        });
-      }
-    });
+  const relatedCvesInputSchema = z.object({
+    vendor: z.string().optional().describe("Vendor name to find related CVEs"),
+    product: z.string().optional().describe("Product name to find related CVEs"),
+    limit: z.number().optional().describe("Maximum number of results to return (default: 20)"),
+    fields: z.array(z.enum([
+      "cveID", "vendorProject", "product", "vulnerabilityName", "dateAdded",
+      "shortDescription", "requiredAction", "dueDate", "knownRansomwareCampaignUse",
+      "cwes", "notes"
+    ]))
+      .optional()
+      .describe("Array of fields to include in response (default: ['cveID', 'vendorProject', 'product', 'vulnerabilityName', 'dateAdded']). Available fields: cveID, vendorProject, product, vulnerabilityName, dateAdded, shortDescription, requiredAction, dueDate, knownRansomwareCampaignUse, cwes, notes")
+  });
 
   const registeredTool = server.tool(
     "get_related_cves",
@@ -46,13 +37,6 @@ export function registerGetRelatedCvesTool(server: McpServer) {
       idempotentHint: true
     },
     async (params: { vendor?: string; product?: string; limit?: number; fields?: string[] }) => {
-      if (!params.vendor && !params.product) {
-        return {
-          content: [{ type: "text", text: "Either vendor or product parameter must be provided" }],
-          isError: true,
-        };
-      }
-      
       try {
         const kevData = await getKevData();
         const limit = params.limit || 20;

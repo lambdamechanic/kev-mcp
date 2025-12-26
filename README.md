@@ -138,6 +138,15 @@ node build/kev-mcp-bundle.cjs
 node build/kev-mcp-bundle.cjs --transport http
 ```
 
+### Local Tooltest Harness
+
+Run the local tooltest integration against the HTTP transport (no external network calls):
+
+```bash
+cargo install --git https://github.com/lambdamechanic/tooltest
+npm run tooltest:local
+```
+
 ### MCP Client Configuration
 
 #### For STDIO Transport (Most Common)
@@ -345,7 +354,7 @@ Finds vulnerabilities related to a specific vendor or product.
 - `product` (string, optional): Product name to find related CVEs
 - `limit` (number, optional): Maximum number of results to return (default: 20)
 
-**Note:** At least one of `vendor` or `product` must be provided.
+**Note:** If neither `vendor` nor `product` is provided, results are unfiltered (up to `limit`).
 
 **Example Response:**
 ```json

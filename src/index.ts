@@ -53,27 +53,6 @@ const EMPTY_OBJECT_JSON_SCHEMA = {
   additionalProperties: false,
 };
 
-function applyRelatedCvesSchema(schema: Record<string, unknown>) {
-  const properties =
-    (schema.properties as Record<string, unknown> | undefined) ?? {};
-  const additionalProperties =
-    (schema.additionalProperties as boolean | undefined) ?? false;
-  const base = {
-    type: "object",
-    properties,
-    additionalProperties,
-  };
-
-  return {
-    ...schema,
-    ...base,
-    anyOf: [
-      { ...base, required: ["vendor"] },
-      { ...base, required: ["product"] },
-    ],
-  } as Record<string, unknown>;
-}
-
 function installToolSchemaOverrides(target: McpServer) {
   const toolRegistry = (target as any)._registeredTools as Record<
     string,
@@ -87,10 +66,6 @@ function installToolSchemaOverrides(target: McpServer) {
         let inputSchema = tool.inputSchema
           ? zodToJsonSchema(tool.inputSchema, { strictUnions: true })
           : EMPTY_OBJECT_JSON_SCHEMA;
-
-        if (name === "get_related_cves") {
-          inputSchema = applyRelatedCvesSchema(inputSchema as Record<string, unknown>);
-        }
 
         const toolDefinition: Record<string, unknown> = {
           name,

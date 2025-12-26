@@ -30,6 +30,7 @@
     "clean": "rm -rf build",
     "start": "node build/kev-mcp-bundle.cjs",
     "start-http": "node build/kev-mcp-bundle.cjs --transport http",
+    "tooltest:local": "npm run build && node --test test/tooltest-local.test.js",
     "prepare": "npm run build",
     "prepublishOnly": "npm run build",
     "inspector": "npx @modelcontextprotocol/inspector"
