@@ -54,10 +54,23 @@ const EMPTY_OBJECT_JSON_SCHEMA = {
 };
 
 function applyRelatedCvesSchema(schema: Record<string, unknown>) {
+  const properties =
+    (schema.properties as Record<string, unknown> | undefined) ?? {};
+  const additionalProperties =
+    (schema.additionalProperties as boolean | undefined) ?? false;
+  const base = {
+    type: "object",
+    properties,
+    additionalProperties,
+  };
+
   return {
     ...schema,
-    type: "object",
-    anyOf: [{ required: ["vendor"] }, { required: ["product"] }],
+    ...base,
+    anyOf: [
+      { ...base, required: ["vendor"] },
+      { ...base, required: ["product"] },
+    ],
   } as Record<string, unknown>;
 }
 
