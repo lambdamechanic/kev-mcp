@@ -58,7 +58,7 @@ function applyRelatedCvesSchema(schema: Record<string, unknown>) {
     ...schema,
     type: "object",
     anyOf: [{ required: ["vendor"] }, { required: ["product"] }],
-  };
+  } as Record<string, unknown>;
 }
 
 function installToolSchemaOverrides(target: McpServer) {
@@ -237,4 +237,3 @@ export async function main(transport: string = "stdio") {
     process.exit(1);
   }
 }
-
