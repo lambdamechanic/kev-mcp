@@ -1,12 +1,14 @@
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { toFetchResponse, toReqRes } from "fetch-to-node";
 import { getKevData } from "./utils.js";
 import { registerAllTools } from "./tools/index.js";
 import { requestLogger, healthCheckLogger } from "./middleware/logging.js";
+import { zodToJsonSchema } from "zod-to-json-schema";
 
 // Define environment type with requestId
 type Env = {
@@ -45,8 +47,59 @@ RESPONSE BEST PRACTICES:
   `,
 });
 
+const EMPTY_OBJECT_JSON_SCHEMA = {
+  type: "object",
+  properties: {},
+  additionalProperties: false,
+};
+
+function applyRelatedCvesSchema(schema: Record<string, unknown>) {
+  return {
+    ...schema,
+    type: "object",
+    anyOf: [{ required: ["vendor"] }, { required: ["product"] }],
+  };
+}
+
+function installToolSchemaOverrides(target: McpServer) {
+  const toolRegistry = (target as any)._registeredTools as Record<
+    string,
+    { enabled: boolean; description?: string; annotations?: unknown; inputSchema?: any; outputSchema?: any }
+  >;
+
+  target.server.setRequestHandler(ListToolsRequestSchema, () => ({
+    tools: Object.entries(toolRegistry)
+      .filter(([, tool]) => tool.enabled)
+      .map(([name, tool]) => {
+        let inputSchema = tool.inputSchema
+          ? zodToJsonSchema(tool.inputSchema, { strictUnions: true })
+          : EMPTY_OBJECT_JSON_SCHEMA;
+
+        if (name === "get_related_cves") {
+          inputSchema = applyRelatedCvesSchema(inputSchema as Record<string, unknown>);
+        }
+
+        const toolDefinition: Record<string, unknown> = {
+          name,
+          description: tool.description,
+          inputSchema,
+          annotations: tool.annotations,
+        };
+
+        if (tool.outputSchema) {
+          toolDefinition.outputSchema = zodToJsonSchema(tool.outputSchema, {
+            strictUnions: true,
+          });
+        }
+
+        return toolDefinition;
+      }),
+  }));
+}
+
 // Register all the tools
 registerAllTools(server);
+installToolSchemaOverrides(server);
 
 // Start the server with stdio transport
 async function startStdioServer() {
@@ -184,5 +237,4 @@ export async function main(transport: string = "stdio") {
     process.exit(1);
   }
 }
-
 
