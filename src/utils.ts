@@ -4,7 +4,10 @@ import path from "path";
 import fetch from "node-fetch";
 
 // Constants
-export const KEV_URL = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json";
+export const KEV_URL =
+  process.env.KEV_MIRROR_URL ??
+  process.env.KEV_URL ??
+  "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json";
 export const CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 // Cache storage
