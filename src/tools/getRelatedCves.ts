@@ -3,17 +3,49 @@ import { z } from "zod";
 import { getKevData } from "../utils.js";
 
 export function registerGetRelatedCvesTool(server: McpServer) {
-  const relatedCvesInputSchema = z.object({
-    vendor: z.string().optional().describe("Vendor name to find related CVEs"),
-    product: z.string().optional().describe("Product name to find related CVEs"),
-    limit: z.number().optional().describe("Maximum number of results to return (default: 20)"),
-    fields: z.array(z.enum([
-      "cveID", "vendorProject", "product", "vulnerabilityName", "dateAdded",
-      "shortDescription", "requiredAction", "dueDate", "knownRansomwareCampaignUse",
-      "cwes", "notes"
-    ]))
-      .optional()
-      .describe("Array of fields to include in response (default: ['cveID', 'vendorProject', 'product', 'vulnerabilityName', 'dateAdded']). Available fields: cveID, vendorProject, product, vulnerabilityName, dateAdded, shortDescription, requiredAction, dueDate, knownRansomwareCampaignUse, cwes, notes")
+  const relatedCvesFields = z.enum([
+    "cveID", "vendorProject", "product", "vulnerabilityName", "dateAdded",
+    "shortDescription", "requiredAction", "dueDate", "knownRansomwareCampaignUse",
+    "cwes", "notes"
+  ]);
+
+  const relatedCvesInputSchema = z.union([
+    z.object({
+      vendor: z.string().describe("Vendor name to find related CVEs"),
+      product: z.string().optional().describe("Product name to find related CVEs"),
+      limit: z.number().optional().describe("Maximum number of results to return (default: 20)"),
+      fields: z.array(relatedCvesFields)
+        .optional()
+        .describe("Array of fields to include in response (default: ['cveID', 'vendorProject', 'product', 'vulnerabilityName', 'dateAdded']). Available fields: cveID, vendorProject, product, vulnerabilityName, dateAdded, shortDescription, requiredAction, dueDate, knownRansomwareCampaignUse, cwes, notes")
+    }),
+    z.object({
+      vendor: z.string().optional().describe("Vendor name to find related CVEs"),
+      product: z.string().describe("Product name to find related CVEs"),
+      limit: z.number().optional().describe("Maximum number of results to return (default: 20)"),
+      fields: z.array(relatedCvesFields)
+        .optional()
+        .describe("Array of fields to include in response (default: ['cveID', 'vendorProject', 'product', 'vulnerabilityName', 'dateAdded']). Available fields: cveID, vendorProject, product, vulnerabilityName, dateAdded, shortDescription, requiredAction, dueDate, knownRansomwareCampaignUse, cwes, notes")
+    }),
+  ]);
+
+  const vulnerabilitySchema = z.object({
+    cveID: z.string().nullable(),
+    vendorProject: z.string().nullable(),
+    product: z.string().nullable(),
+    vulnerabilityName: z.string().nullable(),
+    dateAdded: z.string().nullable(),
+    shortDescription: z.string().nullable(),
+    requiredAction: z.string().nullable(),
+    dueDate: z.string().nullable(),
+    knownRansomwareCampaignUse: z.string().nullable(),
+    cwes: z.array(z.string()).nullable(),
+    notes: z.string().nullable(),
+  });
+
+  const outputSchema = z.object({
+    count: z.number(),
+    totalMatches: z.number(),
+    vulnerabilities: z.array(vulnerabilitySchema),
   });
 
   const registeredTool = server.tool(
@@ -23,11 +55,7 @@ export function registerGetRelatedCvesTool(server: McpServer) {
       vendor: z.string().optional().describe("Vendor name to find related CVEs"),
       product: z.string().optional().describe("Product name to find related CVEs"),
       limit: z.number().optional().describe("Maximum number of results to return (default: 20)"),
-      fields: z.array(z.enum([
-        "cveID", "vendorProject", "product", "vulnerabilityName", "dateAdded",
-        "shortDescription", "requiredAction", "dueDate", "knownRansomwareCampaignUse",
-        "cwes", "notes"
-      ]))
+      fields: z.array(relatedCvesFields)
         .optional()
         .describe("Array of fields to include in response (default: ['cveID', 'vendorProject', 'product', 'vulnerabilityName', 'dateAdded']). Available fields: cveID, vendorProject, product, vulnerabilityName, dateAdded, shortDescription, requiredAction, dueDate, knownRansomwareCampaignUse, cwes, notes")
     },
@@ -37,6 +65,13 @@ export function registerGetRelatedCvesTool(server: McpServer) {
       idempotentHint: true
     },
     async (params: { vendor?: string; product?: string; limit?: number; fields?: string[] }) => {
+      if (!params.vendor && !params.product) {
+        return {
+          content: [{ type: "text", text: "Either vendor or product parameter must be provided" }],
+          isError: true,
+        };
+      }
+
       try {
         const kevData = await getKevData();
         const limit = params.limit || 20;
@@ -62,25 +97,42 @@ export function registerGetRelatedCvesTool(server: McpServer) {
         const limitedResults = relatedVulnerabilities.slice(0, limit);
 
         // Filter fields in results
+        const allFields = [
+          "cveID",
+          "vendorProject",
+          "product",
+          "vulnerabilityName",
+          "dateAdded",
+          "shortDescription",
+          "requiredAction",
+          "dueDate",
+          "knownRansomwareCampaignUse",
+          "cwes",
+          "notes",
+        ];
         const filteredResults = limitedResults.map((vuln: any) => {
-          const filteredVuln: any = {};
-          requestedFields.forEach(field => {
+          const filteredVuln: Record<string, unknown> = Object.fromEntries(
+            allFields.map((field) => [field, null])
+          );
+          requestedFields.forEach((field) => {
             if (vuln[field] !== undefined) {
               filteredVuln[field] = vuln[field];
             }
           });
           return filteredVuln;
         });
-        
+        const response = {
+          count: filteredResults.length,
+          totalMatches: relatedVulnerabilities.length,
+          vulnerabilities: filteredResults
+        };
+
         return {
           content: [{ 
             type: "text", 
-            text: JSON.stringify({
-              count: filteredResults.length,
-              totalMatches: relatedVulnerabilities.length,
-              vulnerabilities: filteredResults
-            }) 
+            text: JSON.stringify(response) 
           }],
+          structuredContent: response,
         };
       } catch (error) {
         return {
@@ -90,6 +142,6 @@ export function registerGetRelatedCvesTool(server: McpServer) {
       }
     },
   );
-
-  (registeredTool as { inputSchema?: unknown }).inputSchema = relatedCvesInputSchema;
+  (registeredTool as { inputSchema?: z.ZodTypeAny }).inputSchema = relatedCvesInputSchema;
+  (registeredTool as { outputSchema?: unknown }).outputSchema = outputSchema;
 }
